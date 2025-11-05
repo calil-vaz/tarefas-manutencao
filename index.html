@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Tarefas de Manutenção - Grupo Pereira</title>
+    <link rel="icon" href="./img/icon-gp-pereira.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ========== TELA DE LOGIN ========== -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="login-box">
+                <div class="login-header">
+                    <img class="logoGP" src="../img/logo-gp-pereira.svg" alt="Logo Grupo Pereira">
+                    <h1>Tarefas Técnico de Manutenção</h1>
+                    <p>Regional SCN</p>
+                </div>
+
+                <form id="login-form" class="login-form">
+                    <div class="form-group">
+                        <label for="login-store">Loja:</label>
+                        <input type="number" id="login-store" placeholder="Ex: 295" oninput="limitLength(this, 3)" required>
+                        <small>Insira o número da sua filial (ex: 295, 115, 305, 310)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-role">Tipo de Acesso</label>
+                        <select id="login-role" required>
+                            <option value="">Selecione seu perfil</option>
+                            <option value="gerente">Gerente (Solicitante)</option>
+                            <option value="tecnico">Técnico (Executante)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-name">Nome</label>
+                        <input type="text" id="login-name" placeholder="Seu nome completo" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Entrar
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    <p>Desenvolvido por Calil Asir Vaz Velozo</p>
+                    <p>PCM SCN</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TELA DO GERENTE (SOLICITANTE) ========== -->
+    <div id="gerente-screen" class="screen">
+        <nav class="navbar">
+            <div class="navbar-container">
+                <div class="navbar-brand">
+                    <!-- <img class="logoGP" src="../img/logo-gp-pereira.svg" alt="Logo Grupo Pereira"> -->
+                </div>
+                <div class="navbar-info">
+                    <span id="gerente-user-info"></span>
+                    <button id="gerente-logout" class="btn btn-sm btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <!-- Header -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1><i class="fas fa-plus-circle"></i> Solicitar Tarefa de Manutenção</h1>
+                    <p>Preencha o formulário abaixo para criar uma nova solicitação de manutenção</p>
+                </div>
+            </section>
+
+            <!-- Formulário de Nova Tarefa -->
+            <section class="form-section">
+                <div class="form-card">
+                    <div style="display: flex; align-items: center;">
+                        <img class="logoGP" src="../img/logo-gp-pereira.svg" alt="Logo Grupo Pereira" style="margin: 0 auto;">
+                    </div>
+                    <h2><i class="fas fa-edit"></i> Nova Solicitação</h2>
+                    <form id="gerente-form" class="task-form">
+                        <div class="form-group">
+                            <label for="gerente-titulo">Título da Tarefa *</label>
+                            <input type="text" id="gerente-titulo" placeholder="Ex: Refrigerador com vazamento" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gerente-descricao">Descrição Detalhada *</label>
+                            <textarea id="gerente-descricao" rows="5" placeholder="Descreva o problema em detalhes..." required></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Enviar Solicitação
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="fas fa-redo"></i> Limpar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Lista de Tarefas Solicitadas -->
+            <section class="tasks-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Minhas Solicitações</h2>
+                    <button id="gerente-refresh" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table id="gerente-tasks-table" class="modern-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag"></i> ID</th>
+                                <th><i class="fas fa-calendar"></i> Data</th>
+                                <th><i class="fas fa-heading"></i> Título</th>
+                                <th><i class="fas fa-info-circle"></i> Status</th>
+                                <th><i class="fas fa-file-alt"></i> O.S./S.S.</th>
+                                <th><i class="fas fa-user"></i> Técnico</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gerente-tasks-body">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 20px;">
+                                    <i class="fas fa-inbox"></i> Nenhuma solicitação ainda
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <footer class="footer">
+            <p>Desenvolvido por Calil Asir Vaz Velozo</p>
+            <p>PCM SCN</p>
+        </footer>
+    </div>
+
+    <!-- ========== TELA DO TÉCNICO (EXECUTANTE) ========== -->
+    <div id="tecnico-screen" class="screen">
+        <nav class="navbar">
+            <div class="navbar-container">
+                
+                <div class="navbar-info">
+                    <span id="tecnico-user-info"></span>
+                    <button id="tecnico-logout" class="btn btn-sm btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <!-- Header -->
+            <!-- <section class="hero-section">
+                <div class="hero-content">
+                    <h1><i class="fas fa-wrench"></i> Solicitações de Tarefas</h1>
+                    <p>Tarefas para gerar O.S.</p>
+                </div>
+            </section> -->
+
+            <!-- Cards de Estatísticas -->
+            <!-- <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-hourglass-start"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Pendentes</h3>
+                            <p class="stat-number" id="tecnico-pending">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-spinner"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Em Andamento</h3>
+                            <p class="stat-number" id="tecnico-inprogress">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Concluídas</h3>
+                            <p class="stat-number" id="tecnico-completed">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Sem O.S./S.S.</h3>
+                            <p class="stat-number" id="tecnico-without-os">0</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             Filtros 
+            <section class="filters-section">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="tecnico-status-filter">Status</label>
+                        <select id="tecnico-status-filter">
+                            <option value="">Todos</option>
+                            <option value="PENDENTE">Pendente</option>
+                            <option value="EM_ANDAMENTO">Em Andamento</option>
+                            <option value="CONCLUIDA">Concluída</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="tecnico-search">Buscar</label>
+                        <input type="text" id="tecnico-search" placeholder="ID, Título ou Solicitante...">
+                    </div>
+
+                    <button id="tecnico-refresh" class="btn btn-secondary">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+            </section> -->
+
+            <!-- Tabela de Tarefas -->
+            <section class="tasks-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-tasks"></i> Tarefas da Loja</h2>
+                </div>
+
+                <div class="table-container">
+                    <table id="tecnico-tasks-table" class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th> Loja</th>
+                                <th> Data</th>
+                                <th>Descrição</th>
+                                <th> Status</th>
+                                <th> O.S./S.S.</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tecnico-tasks-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 20px;">
+                                    <i class="fas fa-inbox"></i> Nenhuma tarefa disponível
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Modal para Atualizar O.S./S.S. -->
+            <div id="update-os-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Atualizar O.S./S.S.</h2>
+                        <button type="button" class="modal-close">&times;</button>
+                    </div>
+                    <form id="update-os-form" class="modal-form">
+                        <div class="form-group">
+                            <label for="update-task-id">ID da Tarefa</label>
+                            <input type="text" id="update-task-id" >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="update-titulo">Título</label>
+                            <input type="text" id="update-titulo" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="update-os-ss">Número da O.S./S.S. *</label>
+                            <input type="text" id="update-os-ss" placeholder="Ex: OS-12345 ou SS-67890" required>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salvar
+                            </button>
+                            <button type="button" class="btn btn-secondary modal-close-btn">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Desenvolvido por Calil Asir Vaz Velozo</p>
+            <p>PCM SCN</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

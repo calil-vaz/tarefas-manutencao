@@ -1,0 +1,6 @@
+{
+    "name": "Tarefas Manutenção",
+    "short_name": "Tarefas Manutenção",
+    "start_url": "/",
+    "display": "standalone"
+}
