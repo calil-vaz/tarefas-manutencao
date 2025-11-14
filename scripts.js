@@ -1,9 +1,8 @@
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxuMhqBvX4cbbf6Bjw_Hag-ATnL6IQ0FtlfN9wFbNt4ccZ3Uc8vaoGpNgyQUvcjuBfBog/exec';
 
 const IMPORT_DATA = 'https://opensheet.elk.sh/1sg-lgB8ZXpNXd_koZsj5sioi4agF5mc1bAt7Rmrk018/TAREFAS'
-const STORES = [11, 85, 115, 135, 165, 182, 183, 187, 190, 194, 195, 198, 213, 214, 223, 225, 250, 255, 270, 294, 295, 305, 309, 310, 325, 335, 375, 384, 385, 405, 420, 479, 480, 492, 561, 825, 897, 905];
+const STORES = [11, 85, 115, 135, 165, 182, 183, 187, 190, 194, 195, 198, 213, 214, 223, 225, 250, 255, 270, 294, 295, 305, 309, 310, 325, 335, 375, 384, 385, 405, 420, 425, 479, 480, 492, 561, 825, 897, 905];
 
-// ========== ESTADO GLOBAL ==========
 let currentUser = {
     store: null,
     role: null,
@@ -13,13 +12,11 @@ let currentUser = {
 let allTasks = [];
 let filteredTasks = [];
 
-// ========== INICIALIZAÇÃO ==========
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
 function initializeApp() {
-    // Verificar se há usuário logado
     const savedUser = localStorage.getItem('currentUser');
     
     if (savedUser) {
@@ -35,7 +32,6 @@ function initializeApp() {
         showScreen('login');
     }
 
-    // Event Listeners
     setupEventListeners();
 }
 
@@ -46,13 +42,11 @@ function limitLength(input, maxLength) {
     }
 
 function setupEventListeners() {
-    // Login
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
     }
 
-    // Gerente
     const gerenteForm = document.getElementById('gerente-form');
     if (gerenteForm) {
         gerenteForm.addEventListener('submit', handleCreateTask);
@@ -68,7 +62,6 @@ function setupEventListeners() {
         gerenteRefresh.addEventListener('click', loadTasks);
     }
 
-    // Técnico
     const tecnicoLogout = document.getElementById('tecnico-logout');
     if (tecnicoLogout) {
         tecnicoLogout.addEventListener('click', handleLogout);
@@ -89,7 +82,6 @@ function setupEventListeners() {
         tecnicoSearch.addEventListener('input', filterTasks);
     }
 
-    // Modal
     const updateOsModal = document.getElementById('update-os-modal');
     const modalCloseButtons = document.querySelectorAll('.modal-close, .modal-close-btn');
     
@@ -104,7 +96,6 @@ function setupEventListeners() {
         updateOsForm.addEventListener('submit', handleUpdateOs);
     }
 
-    // Fechar modal ao clicar fora
     updateOsModal.addEventListener('click', (e) => {
         if (e.target === updateOsModal) {
             updateOsModal.classList.remove('active');
@@ -112,7 +103,6 @@ function setupEventListeners() {
     });
 }
 
-// ========== AUTENTICAÇÃO ==========
 function handleLogin(e) {
     e.preventDefault();
 
@@ -151,20 +141,16 @@ function handleLogout() {
     }
 }
 
-// ========== NAVEGAÇÃO DE TELAS ==========
 function showScreen(screenName) {
-    // Ocultar todas as telas
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
 
-    // Mostrar tela selecionada
     const screen = document.getElementById(`${screenName}-screen`);
     if (screen) {
         screen.classList.add('active');
     }
 
-    // Atualizar informações do usuário
     if (screenName === 'gerente') {
         const userInfo = document.getElementById('gerente-user-info');
         if (userInfo) {
@@ -178,7 +164,6 @@ function showScreen(screenName) {
     }
 }
 
-// ========== CRUD - CRIAR TAREFA ==========
 function handleCreateTask(e) {
     e.preventDefault();
 
@@ -197,7 +182,6 @@ function handleCreateTask(e) {
         descricao: descricao
     };
 
-    // Mostrar loading
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.disabled = true;
@@ -211,23 +195,6 @@ function handleCreateTask(e) {
         },
         body: JSON.stringify(payload) 
     })
-    // .then(response => response.json())
-    // .then(data => {
-        
-    //     if (data.success) {
-    //         showToast(`Tarefa criada com sucesso! ID: `, 'success');
-    //         document.getElementById('gerente-form').reset();
-    //         limparGerente()
-    //         loadTasks();
-    //     } else {
-    //         showToast(`Erro: ${data.data}`, 'error');
-    //     }
-    //     console.log(data);
-    // })
-    // .catch(error => {
-    //     console.error('Erro ao criar tarefa:', error);
-    //     showToast('Erro ao conectar com o servidor!', 'error');
-    // })
     .finally(() => {
         document.getElementById('gerente-form').reset();
         submitBtn.disabled = false;
@@ -237,7 +204,6 @@ function handleCreateTask(e) {
     
 }
 
-// ========== CRUD - CARREGAR TAREFAS ==========
 function loadTasks() {
     const url = `https://opensheet.elk.sh/1sg-lgB8ZXpNXd_koZsj5sioi4agF5mc1bAt7Rmrk018/TAREFAS`;
 
@@ -249,14 +215,11 @@ function loadTasks() {
                 console.log(allTasks);
                 
                 if (currentUser.role === 'gerente') {
-                    // Gerente: vê apenas tarefas da própria loja
                     filteredTasks = allTasks.filter(task => task.LOJA == currentUser.store);
                     renderGerenteTasks();
                 } else if (currentUser.role === 'tecnico') {
-                    // Técnico: vê apenas a própria loja
                     filteredTasks = allTasks.filter(task => task.LOJA == currentUser.store);
                     renderTecnicoTasks();
-                    // updateTecnicoDashboard();
                 }
             } else {
                 showToast('Erro: formato de dados inesperado!', 'error');
@@ -269,8 +232,6 @@ function loadTasks() {
         });
 }
 
-
-// ========== RENDERIZAR TAREFAS - GERENTE ==========
 function renderGerenteTasks() {
     const tbody = document.getElementById('gerente-tasks-body');
     
@@ -300,17 +261,14 @@ function renderGerenteTasks() {
     }).join('');
 }
 
-// ========== RENDERIZAR TAREFAS - TÉCNICO ==========
 function renderTecnicoTasks() {
     const tbody = document.getElementById('tecnico-tasks-body');
     if (!tbody) return;
 
-    // Filtrar tarefas (todas da loja do técnico)
     const tasksToRender = filteredTasks.filter(task => {
         const lojaMatch = task['LOJA'] == currentUser.store;
         const taskStatus = task['STATUS'] === 'PENDENTE';
-        // const searchMatch = task['Título'].toLowerCase().includes(searchFilter);
-        return lojaMatch && taskStatus; // && statusMatch && searchMatch;
+        return lojaMatch && taskStatus;
     });
 
     if (tasksToRender.length === 0) {
@@ -328,7 +286,6 @@ function renderTecnicoTasks() {
     const titulo = task['TITULO'] || '-';
     const status = task['status'] || 'PENDENTE';
     const loja = task['LOJA'] || '-';
-    // const tecnico = task['TÉCNICO'] || '-';
     const osSs = task['OS/SS'] || '-';
     const idTarefa = task['ID'] || '-'; 
 
@@ -351,11 +308,8 @@ function renderTecnicoTasks() {
         </tr>
     `;
 }).join('');
-
 }
 
-
-// ========== ABRIR MODAL DE ATUALIZAÇÃO ==========
 let currentTaskIdToUpdate = null;
 
 function openUpdateOsModal(taskId, titulo) {
@@ -370,9 +324,6 @@ function openUpdateOsModal(taskId, titulo) {
     console.log("Tarefa selecionada:", taskId, titulo);
 }
 
-
-
-// ========== ENVIAR ATUALIZAÇÃO (TÉCNICO) ==========
 function handleUpdateOs(e) {
     e.preventDefault();
 
@@ -390,7 +341,6 @@ function handleUpdateOs(e) {
         tecnico: currentUser.name
     };
 
-    // Mostrar loading
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.disabled = true;
@@ -402,20 +352,6 @@ function handleUpdateOs(e) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
-    // .then(response => response.json())
-    // .then(data => {
-    //     if (data.success) {
-    //         showToast(`Tarefa ${currentTaskIdToUpdate} atualizada com sucesso!`, 'success');
-    //         document.getElementById('update-os-modal').classList.remove('active');
-    //         loadTasks(); // recarrega a planilha atualizada
-    //     } else {
-    //         showToast(`Erro: ${data.data}`, 'error');
-    //     }
-    // })
-    // .catch(error => {
-    //     console.error('Erro ao atualizar tarefa:', error);
-    //     showToast('Erro ao conectar com o servidor!', 'error');
-    // })
     .finally(() => {
         document.getElementById('update-os-modal').classList.remove('active');
         submitBtn.disabled = false;
@@ -423,8 +359,6 @@ function handleUpdateOs(e) {
     });
 }
 
-
-// ========== UTILITÁRIOS ==========
 function formatDate(dateString) {
     if (!dateString) return '-';
     try {
@@ -475,8 +409,3 @@ function showToast(message, type) {
         toast.classList.remove('active');
     }, 3000);
 }
-
-// Função para filtrar tarefas (chamada pelo event listener)
-// function filterTasks() {
-//     renderTecnicoTasks();
-// }
