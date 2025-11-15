@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- ========== TELA DE LOGIN ========== -->
     <div id="login-screen" class="screen active">
         <div class="login-container">
             <div class="login-box">
@@ -56,7 +55,6 @@
         </div>
     </div>
 
-    <!-- ========== TELA DO GERENTE (SOLICITANTE) ========== -->
     <div id="gerente-screen" class="screen">
         <nav class="navbar">
             <div class="navbar-container">
@@ -73,7 +71,6 @@
         </nav>
 
         <div class="container">
-            <!-- Header -->
             <section class="hero-section">
                 <div class="hero-content">
                     <h1><i class="fas fa-plus-circle"></i> Solicitar Tarefa de Manutenção</h1>
@@ -81,7 +78,6 @@
                 </div>
             </section>
 
-            <!-- Formulário de Nova Tarefa -->
             <section class="form-section">
                 <div class="form-card">
                     <div style="display: flex; align-items: center;">
@@ -111,10 +107,17 @@
                 </div>
             </section>
 
-            <!-- Lista de Tarefas Solicitadas -->
             <section class="tasks-section">
                 <div class="section-header">
                     <h2><i class="fas fa-list"></i> Minhas Solicitações</h2>
+                    <div class="filter-group">
+                        <label for="gerente-status-filter">Status:</label>
+                        <select id="gerente-status-filter" class="form-control">
+                            <option value="PENDENTE">Pendentes</option>
+                            <option value="CONCLUIDA">Concluídas</option>
+                            <option value="TODAS">Todas</option>
+                        </select>
+                    </div>
                     <button id="gerente-refresh" class="btn btn-sm btn-secondary">
                         <i class="fas fa-sync-alt"></i> Atualizar
                     </button>
@@ -150,7 +153,6 @@
         </footer>
     </div>
 
-    <!-- ========== TELA DO TÉCNICO (EXECUTANTE) ========== -->
     <div id="tecnico-screen" class="screen">
         <nav class="navbar">
             <div class="navbar-container">
@@ -165,114 +167,21 @@
         </nav>
 
         <div class="container">
-            <!-- Header -->
-            <!-- <section class="hero-section">
-                <div class="hero-content">
-                    <h1><i class="fas fa-wrench"></i> Solicitações de Tarefas</h1>
-                    <p>Tarefas para gerar O.S.</p>
-                </div>
-            </section> -->
-
-            <!-- Cards de Estatísticas -->
-            <!-- <section class="stats-section">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-hourglass-start"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>Pendentes</h3>
-                            <p class="stat-number" id="tecnico-pending">0</p>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-spinner"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>Em Andamento</h3>
-                            <p class="stat-number" id="tecnico-inprogress">0</p>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>Concluídas</h3>
-                            <p class="stat-number" id="tecnico-completed">0</p>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>Sem O.S./S.S.</h3>
-                            <p class="stat-number" id="tecnico-without-os">0</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-             Filtros 
-            <section class="filters-section">
-                <div class="filters-container">
-                    <div class="filter-group">
-                        <label for="tecnico-status-filter">Status</label>
-                        <select id="tecnico-status-filter">
-                            <option value="">Todos</option>
-                            <option value="PENDENTE">Pendente</option>
-                            <option value="EM_ANDAMENTO">Em Andamento</option>
-                            <option value="CONCLUIDA">Concluída</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="tecnico-search">Buscar</label>
-                        <input type="text" id="tecnico-search" placeholder="ID, Título ou Solicitante...">
-                    </div>
-
-                    <button id="tecnico-refresh" class="btn btn-secondary">
+                        <section class="tasks-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-tasks"></i> Tarefas da Loja</h2>
+                    <button id="tecnico-refresh" class="btn btn-sm btn-secondary">
                         <i class="fas fa-sync-alt"></i> Atualizar
                     </button>
                 </div>
-            </section> -->
 
-            <!-- Tabela de Tarefas -->
-            <section class="tasks-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-tasks"></i> Tarefas da Loja</h2>
-                </div>
-
-                <div class="table-container">
-                    <table id="tecnico-tasks-table" class="modern-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th> Loja</th>
-                                <th> Data</th>
-                                <th>Descrição</th>
-                                <th> Status</th>
-                                <th> O.S./S.S.</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tecnico-tasks-body">
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 20px;">
-                                    <i class="fas fa-inbox"></i> Nenhuma tarefa disponível
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="tecnico-tasks-container" class="task-cards-grid">
+                    <p style="text-align: center; padding: 20px;">
+                        <i class="fas fa-inbox"></i> Nenhuma tarefa disponível
+                    </p>
                 </div>
             </section>
 
-            <!-- Modal para Atualizar O.S./S.S. -->
             <div id="update-os-modal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -314,7 +223,6 @@
         </footer>
     </div>
 
-    <!-- Toast Notifications -->
     <div id="toast" class="toast"></div>
 
     <script src="scripts.js"></script>
