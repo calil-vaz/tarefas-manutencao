@@ -62,6 +62,11 @@ function setupEventListeners() {
         gerenteRefresh.addEventListener('click', loadTasks);
     }
 
+    const gerenteStatusFilter = document.getElementById('gerente-status-filter');
+    if (gerenteStatusFilter) {
+        gerenteStatusFilter.addEventListener('change', filterGerenteTasks);
+    }
+
     const tecnicoLogout = document.getElementById('tecnico-logout');
     if (tecnicoLogout) {
         tecnicoLogout.addEventListener('click', handleLogout);
@@ -71,17 +76,7 @@ function setupEventListeners() {
     if (tecnicoRefresh) {
         tecnicoRefresh.addEventListener('click', loadTasks);
     }
-
-    const tecnicoStatusFilter = document.getElementById('tecnico-status-filter');
-    if (tecnicoStatusFilter) {
-        tecnicoStatusFilter.addEventListener('change', filterTasks);
-    }
-
-    const tecnicoSearch = document.getElementById('tecnico-search');
-    if (tecnicoSearch) {
-        tecnicoSearch.addEventListener('input', filterTasks);
-    }
-
+    
     const updateOsModal = document.getElementById('update-os-modal');
     const modalCloseButtons = document.querySelectorAll('.modal-close, .modal-close-btn');
     
@@ -200,7 +195,6 @@ function handleCreateTask(e) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
     });
-    console.log(payload);
     
 }
 
@@ -212,13 +206,10 @@ function loadTasks() {
         .then(data => {
             if (Array.isArray(data)) {
                 allTasks = data;
-                console.log(allTasks);
                 
                 if (currentUser.role === 'gerente') {
-                    filteredTasks = allTasks.filter(task => task.LOJA == currentUser.store);
                     renderGerenteTasks();
                 } else if (currentUser.role === 'tecnico') {
-                    filteredTasks = allTasks.filter(task => task.LOJA == currentUser.store);
                     renderTecnicoTasks();
                 }
             } else {
@@ -234,20 +225,29 @@ function loadTasks() {
 
 function renderGerenteTasks() {
     const tbody = document.getElementById('gerente-tasks-body');
-    
-    if (!tbody) return;
+    const filter = document.getElementById('gerente-status-filter');
+    const selectedStatus = filter ? filter.value : 'PENDENTE'; 
 
-    if (filteredTasks.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;"><i class="fas fa-inbox"></i> Nenhuma solicitação ainda</td></tr>';
+    if (!tbody) return;
+    let tasksToRender = allTasks.filter(task => task.LOJA == currentUser.store);
+
+    if (selectedStatus !== 'TODAS') {
+        tasksToRender = tasksToRender.filter(task => task.STATUS === selectedStatus);
+    }
+    
+    filteredTasks = tasksToRender;
+
+    if (tasksToRender.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;"><i class="fas fa-inbox"></i> Nenhuma solicitação encontrada com o filtro atual.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = filteredTasks.map(task => {
+    tbody.innerHTML = tasksToRender.map(task => {
         const date = formatDate(task.DATA_SOLICITACAO);
         const status = getStatusBadge(task.STATUS);
         const osSs = task['OS/SS'] || '-';
         const tecnico = task['TÉCNICO'] || '-';
-
+        
         return `
             <tr>
                 <td><strong>${task.ID}</strong></td>
@@ -261,53 +261,57 @@ function renderGerenteTasks() {
     }).join('');
 }
 
-function renderTecnicoTasks() {
-    const tbody = document.getElementById('tecnico-tasks-body');
-    if (!tbody) return;
+function filterGerenteTasks() {
+    renderGerenteTasks();
+}
 
-    const tasksToRender = filteredTasks.filter(task => {
-        const lojaMatch = task['LOJA'] == currentUser.store;
-        const taskStatus = task['STATUS'] === 'PENDENTE';
-        return lojaMatch && taskStatus;
-    });
+function renderTecnicoTasks() {
+    const container = document.getElementById('tecnico-tasks-container');
+    if (!container) return;
+    const tasksToRender = allTasks.filter(task => 
+        task.LOJA == currentUser.store && task.STATUS === 'PENDENTE'
+    );
 
     if (tasksToRender.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 20px;">
-                    <i class="fas fa-inbox"></i> Nenhuma tarefa encontrada
-                </td>
-            </tr>`;
+        container.innerHTML = `
+            <p style="text-align: center; padding: 20px;">
+                <i class="fas fa-inbox"></i> Nenhuma tarefa pendente encontrada para a loja ${currentUser.store}.
+            </p>`;
         return;
     }
 
-    tbody.innerHTML = tasksToRender.map(task => {
-    const dataEnvio = task['DATA_SOLICITACAO'] || '-';
-    const titulo = task['TITULO'] || '-';
-    const status = task['status'] || 'PENDENTE';
-    const loja = task['LOJA'] || '-';
-    const osSs = task['OS/SS'] || '-';
-    const idTarefa = task['ID'] || '-'; 
+    container.innerHTML = tasksToRender.map(task => {
+        const dataEnvio = formatDate(task['DATA_SOLICITACAO']) || '-';
+        const titulo = task['TITULO'] || 'Sem Título';
+        const descricao = task['DESCRIÇÃO'] || 'Sem descrição.';
+        const solicitante = task['GERENTE'] || 'Desconhecido';
+        const idTarefa = task['ID'] || 'N/A'; 
+        const status = task['STATUS'] || 'PENDENTE';
 
-    const statusBadge = getStatusBadge(status);
+        const statusBadge = getStatusBadge(status);
 
-    const isPending = status === 'PENDENTE';
-    const actionButton = isPending 
-        ? `<button class="btn btn-sm btn-primary" onclick="openUpdateOsModal('${idTarefa}', '${titulo.replace(/'/g, "\\'")}')"><i class="fas fa-wrench"></i> Atender</button>`
-        : `<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-check"></i> ${status}</button>`;
+        const actionButton = status === 'PENDENTE'
+            ? `<button class="btn btn-sm btn-primary btn-block" onclick="openUpdateOsModal('${idTarefa}', '${titulo.replace(/'/g, "\\'")}')"><i class="fas fa-wrench"></i> Atender Tarefa</button>`
+            : `<button class="btn btn-sm btn-secondary btn-block" disabled><i class="fas fa-check"></i> ${status}</button>`;
 
-    return `
-        <tr>
-            <td><strong>${idTarefa}</strong></td>
-            <td>${loja}</td>
-            <td>${dataEnvio}</td>
-            <td>${titulo}</td>
-            <td>${statusBadge}</td>
-            <td>${osSs}</td>
-            <td>${actionButton}</td>
-        </tr>
-    `;
-}).join('');
+        return `
+            <div class="task-card ${status.toLowerCase()}">
+                <div class="card-header">
+                    <span class="task-id">#${idTarefa}</span>
+                    ${statusBadge}
+                </div>
+                <h3 class="card-title">${titulo}</h3>
+                <p class="card-description">${descricao}</p>
+                <div class="card-details">
+                    <p><i class="fas fa-user-tag"></i> Solicitante: <strong>${solicitante}</strong></p>
+                    <p><i class="fas fa-calendar-alt"></i> Data: <strong>${dataEnvio}</strong></p>
+                </div>
+                <div class="card-actions">
+                    ${actionButton}
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 let currentTaskIdToUpdate = null;
@@ -321,7 +325,6 @@ function openUpdateOsModal(taskId, titulo) {
 
     document.getElementById('update-os-modal').classList.add('active');
 
-    console.log("Tarefa selecionada:", taskId, titulo);
 }
 
 function handleUpdateOs(e) {
@@ -361,14 +364,33 @@ function handleUpdateOs(e) {
 
 function formatDate(dateString) {
     if (!dateString) return '-';
-    try {
-        const date = new Date(dateString);
+    
+    let date;
+    
+    date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        const parts = dateString.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
+        if (parts) {
+            date = new Date(parts[3], parts[2] - 1, parts[1]);
+        }
+    }
+
+    if (isNaN(date.getTime())) {
+        const parts = dateString.match(/(\d{4})[/-](\d{1,2})[/-](\d{1,2})/);
+        if (parts) {
+            date = new Date(parts[1], parts[2] - 1, parts[3]);
+        }
+    }
+
+    if (!isNaN(date.getTime())) {
         return date.toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         });
-    } catch (e) {
+    } else {
+        console.error('Falha ao formatar data:', dateString);
         return dateString; 
     }
 }
